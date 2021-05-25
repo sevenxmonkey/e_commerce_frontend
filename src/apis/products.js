@@ -1,15 +1,18 @@
+require('dotenv').config({ path: '../../.env'})
 import axios from 'axios';
 
-const API_KEY = 'KMsTP0PLStuLhUfdZz9MGjqb';
+const API_KEY = process.env.VUE_APP_API_KEY;
+const BASE_URL = process.env.VUE_APP_BESTBUY_API_URL;
 
 const instance = axios.create({
-    baseURL: 'https://api.bestbuy.com/v1/',
+    baseURL: BASE_URL,
     timeout: 5000,
 });
 
 const http = {};
 http.get = (url, options) => {
     return new Promise((resolve, reject) => {
+        console.log(BASE_URL)
         instance.get(url, options)
         .then(response => {
             if(response.status === 200){
