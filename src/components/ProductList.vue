@@ -1,37 +1,41 @@
 <template>
   <div class="productlist-container">
     <!-- Top info -->
-    <div v-show="!this.loading" class="page-top">
-      <div class="t-key">{{ key }}</div>
+    <div v-show="!loading" class="page-top">
+      <div class="t-key">{{ keyword }}</div>
       <div>
-        <span >Viewing <b>{{ from }}</b>-<b>{{ to }}</b> of <b>{{ total }}</b> products</span>
+        <span >Viewing 
+          <b>{{ pagination.from }}</b>-
+          <b>{{ pagination.to }}</b> of 
+          <b>{{ pagination.total }}</b> products
+        </span>
       </div>
     </div>
 
     <!-- Products -->
     <div v-show="!loading" class="items">
-      <ProductCard v-for="item of items" :key="item.sku" :item="item" />
+      <ProductCard v-for="item of products" :key="item.sku" :item="item" />
     </div>
 
     <!-- Pagination -->
-    <div v-show="!this.loading" class="pagination">
-        <div class="btn-pagenav" @click="onClickPage(currentPage - 1)">Prev</div>
+    <div v-show="!loading" class="pagination">
+        <div class="btn-pagenav" @click="onClickPage(page - 1)">Prev</div>
         <div class="pages">
-            <div class="btn-page" v-if="currentPage > 3"
+            <div class="btn-page" v-if="page > 3"
                 @click="onClickPage(1)">1</div>
-            <div v-if="currentPage > 4">...</div>
+            <div v-if="page > 4">...</div>
 
             <div class="btn-page"
                 v-for="pageId of pages" :key="pageId"
-                :class="pageId === currentPage ? 'active' : ''"
+                :class="pageId === page ? 'active' : ''"
                 @click="onClickPage(pageId)">{{pageId}}</div>
 
-            <div v-if="totalPages > 5 && currentPage + 2 < totalPages">...</div>
-            <div class="btn-page" v-if="totalPages > 5 && currentPage + 2 < totalPages"
-                :class="totalPages === currentPage ? 'active' : ''"
-                @click="onClickPage(totalPages)">{{totalPages}}</div>
+            <div v-if="pagination.totalPages > 5 && page + 2 < pagination.totalPages">...</div>
+            <div class="btn-page" v-if="pagination.totalPages > 5 && page + 2 < pagination.totalPages"
+                :class="pagination.totalPages === page ? 'active' : ''"
+                @click="onClickPage(pagination.totalPages)">{{pagination.totalPages}}</div>
         </div>
-        <div class="btn-pagenav" @click="onClickPage(currentPage + 1)">Next</div>
+        <div class="btn-pagenav" @click="onClickPage(page + 1)">Next</div>
     </div>
 
     <div v-show="loading">loading</div>
@@ -39,62 +43,53 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import ProductCard from "../components/ProductCard";
 
 export default {
   name: "ProductList",
   components: { ProductCard },
-  props:{
-    loading: Boolean
-  },
-  data() {
-    return {
-      key: "",
-      items: [],
-      from: 0,
-      to: 0,
-      total: 0,
-      currentPage: 1,
-      totalPages: 0,
-
-      pages: [],
-    };
-  },
-  mounted() {},
-  methods: {
-    renderItems(items, key) {
-      this.items = items;
-      this.key = key;
-    },
-    renderPagination(from, to, total, currentPage, totalPages) {
-      this.from = from;
-      this.to = to;
-      this.total = total;
-      this.currentPage = currentPage;
-      this.totalPages = totalPages;
-
-      //Build pagination by neareat 5 pages
-      this.pages = [];
+  computed:{
+    ...mapState([
+      'products', 
+      'keyword', 
+      'sortIndex', 
+      'page', 
+      'pagination', 
+      'loading'
+    ]),
+    pages(){
+      let pages = [];
+      let totalPages = Number(this.pagination.totalPages);
+      let page = Number(this.page);
       if(totalPages <= 5){
-          for(let i = 0; i < totalPages; i++){
-              this.pages.push(i + 1);
-          }
+        for(let i = 0; i < totalPages; i++){
+          pages.push(i + 1);
+        }
       }else{
-          let init = Math.max(1, this.currentPage - 2);
-          for(let i = 0; i < 5; i++){
-              if(init + i > this.totalPages) break;
-              this.pages.push(init + i);
-          }
+        let init = Math.max(1, page - 2);
+        for(let i = 0; i < 5; i++){
+          if(init + i > totalPages) break;
+          pages.push(init + i);
+        }
       }
-    },
-
+      return pages;
+    }
+  },
+  methods: {
     onClickPage(pageId){
-        if(pageId === this.currentPage || 
+        if(pageId === this.pagination.currentPage || 
             pageId <= 0 || 
-            pageId > this.totalPages){
+            pageId > this.pagination.totalPages){
             return;
         }
-        this.$emit("onPageChange", pageId)
+        const path = this.$route.path 
+                + '?key=' + this.keyword 
+                + '&sort=' + this.sortIndex
+                + '&page=' + pageId;
+        if (this.$route.fullPath !== path) {
+            this.$router.push(path);
+        }
     }
   },
 };

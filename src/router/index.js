@@ -1,13 +1,12 @@
 import Vue from 'vue';
 import VueRouter from "vue-router";
+Vue.use(VueRouter);
 
 const Index = () => import('@/pages/Index');
 const ProductDetail = () => import('@/pages/ProductDetail');
-Vue.use(VueRouter);
 
 export default new VueRouter({
     mode: "history",
-    base: '/',
     routes: [
         {
             path: '/', 

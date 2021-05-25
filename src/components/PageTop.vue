@@ -4,6 +4,7 @@
       <input class="searchbar" type="text" maxlength="24" placeholder="Search..."
         v-model="input"/>
       <img
+        @click="searchHandler"
         src="https://images-na.ssl-images-amazon.com/images/I/41gYkruZM2L.png"
         alt="Magnifying Glass"
         class="button"
@@ -20,14 +21,22 @@ export default {
     }
   },
   mounted(){
+    let self = this;
     window.addEventListener('keydown', (e) => {
-      if (e.key == 'Enter' && this.input) {
+      if (e.key == 'Enter' && self.input) {
+        self.searchHandler();
+      }
+    });
+  },
+  methods:{
+    searchHandler(){
+      if(this.input){
         const path = '/search?key=' + encodeURIComponent(this.input);
         if (this.$route.fullPath !== path) {
           this.$router.push(path);
         }
       }
-    });
+    }
   }
 };
 </script>

@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import api from '../apis/interfaces'
+import api from '../apis/products'
 export default {
     name:"ProductDetail",
     data(){
@@ -76,7 +76,7 @@ export default {
     methods:{
         async renderProduct(){
             this.loading = true;
-            const res = await api.product.getBySku(this.sku);
+            const res = await api.getBySku(this.sku);
             console.log(res);
             this.name = res.name;
             this.manufacturer = res.manufacturer;
